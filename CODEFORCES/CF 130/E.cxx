@@ -211,8 +211,9 @@ bool used[mx];
 void dfs(LLI v,LLI p,bool keep)
 {
 
-
-used[v]=1;
+//cout<<"FF "<<v<<"\n";
+//exit('0');
+    used[v]=1;
     LLI maxi=-1,bigchild=-1;
 
     for(LLI i=0; i<G[v].size(); i++)
@@ -228,14 +229,20 @@ used[v]=1;
         if(u!=p&&u!=bigchild)
             dfs(u,v,0);
     }
+
     if(bigchild!=-1)
         dfs(bigchild,v,1),big[bigchild]=1;;
+
+
     add(v,p,0,1);
 
-    for(int j=0;j<V[v].size();j++){
 
-    int a=v,b=V[v][j];
-    ans[a][b]=cnt[b];
+    for(int j=0; j<V[v].size(); j++)
+    {
+
+        int a=v,b=V[v][j];
+      //  cout<<"FF "<<a<<" & "<<b<<" * "<<cnt[b]<<"\n";
+        ans[a][b]=cnt[b];
     }
 
 //    ans[v]=sum;
@@ -250,15 +257,17 @@ used[v]=1;
 
 int main()
 {
-    //READ("input.txt");
+   // READ("input.txt");
     //WRITE("output.txt");
     input();
 //    memset(T,-1,sizeof T);
     for(int i=1; i<=node; i++)
         if(vis[i]==0)
         {
+//			cout<<"FF "<<i<<"\n";
             dfs2(i,-1,0);
             go(i,-1);
+
         }
 
     lca_init(node);
@@ -271,25 +280,36 @@ int main()
         int a,b;
         a=Q[i].ff,b=Q[i].ss;
 
-//cout<<"FF "<<a<<" "<<b<<" : = "<<lca_query(node,a,b)<<"\n";
+//cout<<"prev "<<a<<" & "<<b<<"\n";
         a=lca_query(node,a,b);
         Q[i]=MP(a,b);
+        if(a==-1)continue;
         V[a].PB(b);
-
+//cout<<"later "<<a<<" & "<<b<<"\n";
     }
     //adding dsu
-    for(int i=1;i<=node;i++)
-    if(used[i]==0)
+    for(int i=1; i<=node; i++)
+        if(used[i]==0)
+        {
+//cout<<"ss "<<i<<"\n";
+            memset(cnt,0,sizeof cnt);
+            memset(big,0,sizeof big);
+            dfs(i,i,0);
+
+        }
+    for(int i=0; i<Q.size(); i++)
     {
 
-dfs(i,i,0);
+        int a,b;
+        a=Q[i].ff,b=Q[i].ss;
+//    cout<<"FF "<<a<<"\n";
+        if(a==-1)
+        {
 
-    }
-    for(int i=0;i<Q.size();i++){
-
-    int a,b;
-    a=Q[i].ff,b=Q[i].ss;
-    cout<<ans[a][b]<<"\n";
+            cout<<0<<"\n";
+        }
+        else
+            cout<<ans[a][b]<<"\n";
 
     }
 
