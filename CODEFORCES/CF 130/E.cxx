@@ -119,7 +119,7 @@ int P[mx][22]; //স্পার্স টেবিল
 int T[mx]; //প্যারেন্ট
 bool vis[mx];
 
-void dfs(int u,int par,int depth)
+void dfs2(int u,int par,int depth)
 {
     vis[u]=1;
     L[u]=depth;
@@ -131,7 +131,7 @@ void dfs(int u,int par,int depth)
 
         int v=G[u][i];
         if(v==par)continue;
-        dfs(v,u,depth+1);
+        dfs2(v,u,depth+1);
 
 
     }
@@ -139,34 +139,23 @@ void dfs(int u,int par,int depth)
 
 }
 
-int lca_query(int N, int p, int q) //N=নোড সংখ্যা
+int lca_query(int N, int p, int depth) //N=নোড সংখ্যা
 {
-    int tmp, log, i;
 
-    if (L[p] < L[q])
-        tmp = p, p = q, q = tmp;
+    for(int i=30; i>=0; i--)
+        if((1<<i)<=depth)
+        {
 
-    log=1;
-    while(1)
-    {
-        int next=log+1;
-        if((1<<next)>L[p])break;
-        log++;
 
-    }
+            p=P[p][i];
+            depth-=(1<<i);
 
-    for (i = log; i >= 0; i--)
-        if (L[p] - (1 << i) >= L[q])
-            p = P[p][i];
+        }
 
-    if (p == q)
-        return p;
+//        if(depth>0)return -1;
+    return p;
 
-    for (i = log; i >= 0; i--)
-        if (P[p][i] != -1 && P[p][i] != P[q][i])
-            p = P[p][i], q = P[q][i];
 
-    return T[p];
 }
 
 void lca_init(int N)
@@ -182,21 +171,128 @@ void lca_init(int N)
                 P[i][j] = P[P[i][j - 1]][j - 1];
 }
 
+vector<int>V[mx];
+
+LLI SZ[mx];
+void go(LLI u,LLI p)
+{
 
 
+    SZ[u]=1;
+    for(LLI i=0; i<G[u].size(); i++)
+    {
+        LLI v=G[u][i];
+        if(p==v)continue;
+        go(v,u);
+        SZ[u]+=SZ[v];
+    }
+}
 
 
+LLI cnt[mx];
+LLI big[mx];
+void add(LLI v,LLI p,int depth,int x)
+{
 
+    cnt[depth]+=x;
+
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&!big[u])
+            add(u,v,depth+1,x);
+    }
+
+}
+map<int,int>ans[mx];
+bool used[mx];
+void dfs(LLI v,LLI p,bool keep)
+{
+
+
+used[v]=1;
+    LLI maxi=-1,bigchild=-1;
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+        LLI u=G[v][i];
+        if(u!=p&&SZ[u]>maxi)
+            maxi=SZ[u],bigchild=u;
+    }
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&u!=bigchild)
+            dfs(u,v,0);
+    }
+    if(bigchild!=-1)
+        dfs(bigchild,v,1),big[bigchild]=1;;
+    add(v,p,0,1);
+
+    for(int j=0;j<V[v].size();j++){
+
+    int a=v,b=V[v][j];
+    ans[a][b]=cnt[b];
+    }
+
+//    ans[v]=sum;
+//
+    if(bigchild!=-1)
+        big[bigchild]=0;
+    if(keep==0)
+        add(v,p,0,-1);
+
+
+}
 
 int main()
 {
     //READ("input.txt");
     //WRITE("output.txt");
     input();
+//    memset(T,-1,sizeof T);
     for(int i=1; i<=node; i++)
         if(vis[i]==0)
-            dfs(i,i,0);
+        {
+            dfs2(i,-1,0);
+            go(i,-1);
+        }
+
     lca_init(node);
+//    int a,b;
+
+    int sz=Q.size();
+    for(int i=0; i<sz; i++)
+    {
+
+        int a,b;
+        a=Q[i].ff,b=Q[i].ss;
+
+//cout<<"FF "<<a<<" "<<b<<" : = "<<lca_query(node,a,b)<<"\n";
+        a=lca_query(node,a,b);
+        Q[i]=MP(a,b);
+        V[a].PB(b);
+
+    }
+    //adding dsu
+    for(int i=1;i<=node;i++)
+    if(used[i]==0)
+    {
+
+dfs(i,i,0);
+
+    }
+    for(int i=0;i<Q.size();i++){
+
+    int a,b;
+    a=Q[i].ff,b=Q[i].ss;
+    cout<<ans[a][b]<<"\n";
+
+    }
+
 
 
     return 0;
