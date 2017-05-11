@@ -1,4 +1,3 @@
-
 #include <cctype>
 #include <cmath>
 #include <cstdio>
@@ -45,9 +44,18 @@ using namespace std;
 #define f64        long double
 #define PI         acos(-1.0)                        ///PI er value
 
-int Set(int N,int pos){return N=N | (1<<pos);}
-int reset(int N,int pos){return N= N & ~(1<<pos);}
-bool check(int N,int pos){return (bool)(N & (1<<pos));}
+int Set(int N,int pos)
+{
+    return N=N | (1<<pos);
+}
+int reset(int N,int pos)
+{
+    return N= N & ~(1<<pos);
+}
+bool check(int N,int pos)
+{
+    return (bool)(N & (1<<pos));
+}
 void CI(int &_x)
 {
     scanf("%d",&_x);
@@ -77,8 +85,31 @@ int dr4[4]= {0,0,1,-1};                      ///4 direction move
 int dc4[4]= {-1,1,0,0};                      ///or adjacent dir.
 int kn8r[8]= {1,2,2,1,-1,-2,-2,-1};          ///knight moves
 int kn8c[8]= {2,1,-1,-2,-2,-1,1,2};
+#define mx 100005
+int node;
+vector<int>G[mx];
+vector<pair<int,int> >Q;
+void input()
+{
+
+    cin>>node;
+    for(int i=1; i<=node; i++)
+    {
+        int temp;
+        cin>>temp;
+        G[temp].PB(i);
+    }
+    int q;
+    cin>>q;
+    int a,b;
+    FOR0(i,q){
+
+    cin>>a>>b;
+    Q.PB(MP(a,b));
+    }
 
 
+}
 int main()
 {
     //READ("input.txt");
