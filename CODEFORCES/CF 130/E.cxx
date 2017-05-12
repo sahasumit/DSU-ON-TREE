@@ -85,76 +85,56 @@ int dr4[4]= {0,0,1,-1};                      ///4 direction move
 int dc4[4]= {-1,1,0,0};                      ///or adjacent dir.
 int kn8r[8]= {1,2,2,1,-1,-2,-2,-1};          ///knight moves
 int kn8c[8]= {2,1,-1,-2,-2,-1,1,2};
-#define mx 100005
+#define mx 100007
 int node;
 vector<int>G[mx];
-vector<pair<int,int> >Q;
+vector<int>root;
 void input()
 {
-
     cin>>node;
     for(int i=1; i<=node; i++)
     {
-        int temp;
-        cin>>temp;
-        G[temp].PB(i);
+        int u,v;
+        v=i;
+        cin>>u;
+        if(u)
+            G[u].PB(v);
+        else
+            root.PB(i);
     }
-    int q;
-    cin>>q;
-    int a,b;
-    FOR0(i,q)
-    {
-
-        cin>>a>>b;
-        Q.PB(MP(a,b));
-    }
-
-
 }
-
-//lca fuctino
 
 int L[mx]; //লেভেল
 int P[mx][22]; //স্পার্স টেবিল
 int T[mx]; //প্যারেন্ট
-bool vis[mx];
+int SZ[mx];
 
-void dfs2(int u,int par,int depth)
+void dfs2(int from,int u,int dep)
 {
-    vis[u]=1;
-    L[u]=depth;
-    T[u]=par;
-
-    for(int i=0; i<G[u].size(); i++)
+    SZ[u]=1;
+    T[u]=from;
+    L[u]=dep;
+    for(int i=0; i<(int)G[u].size(); i++)
     {
-
-
         int v=G[u][i];
-        if(v==par)continue;
-        dfs2(v,u,depth+1);
-
-
+        if(v==from) continue;
+        dfs2(u,v,dep+1);
+        SZ[u]+=SZ[v];
     }
-
-
 }
 
 int lca_query(int N, int p, int depth) //N=নোড সংখ্যা
 {
 
     for(int i=30; i>=0; i--)
-        if((1<<i)<=depth)
+        if(depth>=(1<<i))
         {
-
-
-            p=P[p][i];
             depth-=(1<<i);
+            p=P[p][i];
+            if(p==-1)break;
 
         }
-
-//        if(depth>0)return -1;
     return p;
-
 
 }
 
@@ -170,149 +150,30 @@ void lca_init(int N)
             if (P[i][j - 1] != -1)
                 P[i][j] = P[P[i][j - 1]][j - 1];
 }
-
-vector<int>V[mx];
-
-LLI SZ[mx];
-void go(LLI u,LLI p)
-{
-
-
-    SZ[u]=1;
-    for(LLI i=0; i<G[u].size(); i++)
-    {
-        LLI v=G[u][i];
-        if(p==v)continue;
-        go(v,u);
-        SZ[u]+=SZ[v];
-    }
-}
-
-
-LLI cnt[mx];
-LLI big[mx];
-void add(LLI v,LLI p,int depth,int x)
-{
-
-    cnt[depth]+=x;
-
-
-    for(LLI i=0; i<G[v].size(); i++)
-    {
-
-        LLI u=G[v][i];
-        if(u!=p&&!big[u])
-            add(u,v,depth+1,x);
-    }
-
-}
-map<int,int>ans[mx];
-bool used[mx];
-void dfs(LLI v,LLI p,bool keep)
-{
-
-//cout<<"FF "<<v<<"\n";
-//exit('0');
-    used[v]=1;
-    LLI maxi=-1,bigchild=-1;
-
-    for(LLI i=0; i<G[v].size(); i++)
-    {
-        LLI u=G[v][i];
-        if(u!=p&&SZ[u]>maxi)
-            maxi=SZ[u],bigchild=u;
-    }
-    for(LLI i=0; i<G[v].size(); i++)
-    {
-
-        LLI u=G[v][i];
-        if(u!=p&&u!=bigchild)
-            dfs(u,v,0);
-    }
-
-    if(bigchild!=-1)
-        dfs(bigchild,v,1),big[bigchild]=1;;
-
-
-    add(v,p,0,1);
-
-
-    for(int j=0; j<V[v].size(); j++)
-    {
-
-        int a=v,b=V[v][j];
-      //  cout<<"FF "<<a<<" & "<<b<<" * "<<cnt[b]<<"\n";
-        ans[a][b]=cnt[b];
-    }
-
-//    ans[v]=sum;
-//
-    if(bigchild!=-1)
-        big[bigchild]=0;
-    if(keep==0)
-        add(v,p,0,-1);
-
-
-}
-
+vector<pair<int,int> >V[mx];
 int main()
 {
-   // READ("input.txt");
+    READ("input.txt");
     //WRITE("output.txt");
+
     input();
-//    memset(T,-1,sizeof T);
-    for(int i=1; i<=node; i++)
-        if(vis[i]==0)
-        {
-//			cout<<"FF "<<i<<"\n";
-            dfs2(i,-1,0);
-            go(i,-1);
-
-        }
-
+    FOR1(i,node)
+    if(SZ[i]==0)
+    {
+        dfs2(-1,i,0);
+    }
     lca_init(node);
-//    int a,b;
 
-    int sz=Q.size();
-    for(int i=0; i<sz; i++)
+    int query;
+    cin>>query;
+    FOR1(i,query)
     {
-
-        int a,b;
-        a=Q[i].ff,b=Q[i].ss;
-
-//cout<<"prev "<<a<<" & "<<b<<"\n";
-        a=lca_query(node,a,b);
-        Q[i]=MP(a,b);
-        if(a==-1)continue;
-        V[a].PB(b);
-//cout<<"later "<<a<<" & "<<b<<"\n";
-    }
-    //adding dsu
-    for(int i=1; i<=node; i++)
-        if(used[i]==0)
-        {
-//cout<<"ss "<<i<<"\n";
-            memset(cnt,0,sizeof cnt);
-            memset(big,0,sizeof big);
-            dfs(i,i,0);
-
-        }
-    for(int i=0; i<Q.size(); i++)
-    {
-
-        int a,b;
-        a=Q[i].ff,b=Q[i].ss;
-//    cout<<"FF "<<a<<"\n";
-        if(a==-1)
-        {
-
-            cout<<0<<"\n";
-        }
-        else
-            cout<<ans[a][b]<<"\n";
+        int nn,dep;
+        cin>>nn>>dep;
+        nn=lca_query(node,nn,dep);
+        V[nn].PB(MP(dep,i));
 
     }
-
 
 
     return 0;
