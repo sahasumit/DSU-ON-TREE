@@ -151,9 +151,77 @@ void lca_init(int N)
                 P[i][j] = P[P[i][j - 1]][j - 1];
 }
 vector<pair<int,int> >V[mx];
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------
+LLI cnt[mx];
+LLI big[mx],sum=0,maximum=0;
+void add(LLI v,LLI p,LLI depth,LLI x)
+{
+
+    cnt[depth]+=x;
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&!big[u])
+            add(u,v,depth+1,x);
+
+    }
+
+}
+LLI ans[mx];
+void dfs(LLI v,LLI p,int dep,bool keep)
+{
+
+
+
+    LLI maxi=-1,bigchild=-1;
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+        LLI u=G[v][i];
+        if(u!=p&&SZ[u]>maxi)
+            maxi=SZ[u],bigchild=u;
+    }
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&u!=bigchild)
+            dfs(u,v,dep+1,0);
+    }
+    if(bigchild!=-1)
+        dfs(bigchild,v,dep+1,1),big[bigchild]=1;;
+    add(v,p,dep,1);
+//
+    for(int i=0; i<V[v].size(); i++)
+    {
+
+        ans[V[v][i].ss]=cnt[V[v][i].ff+dep]-1;
+
+    }
+
+
+    if(bigchild!=-1)
+        big[bigchild]=0;
+    if(keep==0)
+        add(v,p,dep,-1);
+
+
+}
+//-----------------------------------------------------------------------------------------------------
+void print(){
+
+
+for(int i=1;i<=node;i++)
+cout<<"FF "<<i<<" "<<cnt[i]<<"\n";
+
+}
 int main()
 {
-    READ("input.txt");
+//    READ("input.txt");
     //WRITE("output.txt");
 
     input();
@@ -174,6 +242,15 @@ int main()
         V[nn].PB(MP(dep,i));
 
     }
+    for(int i=0;i<root.size();i++){
+//cout<<"ROOT "<<root[i]<<"\n"C
+//memset(cnt,0,sizeof cnt);
+    dfs(root[i],root[i],0,0);
+
+    }
+FOR1(i,query)
+cout<<ans[i]<<" ";
+puts("");
 
 
     return 0;
