@@ -1,4 +1,3 @@
-
 #include <cctype>
 #include <cmath>
 #include <cstdio>
@@ -45,9 +44,18 @@ using namespace std;
 #define f64        long double
 #define PI         acos(-1.0)                        ///PI er value
 
-int Set(int N,int pos){return N=N | (1<<pos);}
-int reset(int N,int pos){return N= N & ~(1<<pos);}
-bool check(int N,int pos){return (bool)(N & (1<<pos));}
+int Set(int N,int pos)
+{
+    return N=N | (1<<pos);
+}
+int reset(int N,int pos)
+{
+    return N= N & ~(1<<pos);
+}
+bool check(int N,int pos)
+{
+    return (bool)(N & (1<<pos));
+}
 void CI(int &_x)
 {
     scanf("%d",&_x);
@@ -77,12 +85,176 @@ int dr4[4]= {0,0,1,-1};                      ///4 direction move
 int dc4[4]= {-1,1,0,0};                      ///or adjacent dir.
 int kn8r[8]= {1,2,2,1,-1,-2,-2,-1};          ///knight moves
 int kn8c[8]= {2,1,-1,-2,-2,-1,1,2};
+#define mx 100007
+int node;
+string str[mx];
+vector<int>root,G[mx];
+void input()
+{
+
+    string s;
+    cin>>node;
+    FOR1(i,node)
+    {
+        cin>>s;
+        str[i]=s;
+        int u,v=i;
+        cin>>u;
+        if(u==0)
+        {
+            root.PB(v);
+        }
+        else
+        {
+            G[u].PB(v);
+        }
+    }
+}
+//#define mx 100007
+LLI SZ[mx];
+void go(LLI u,LLI p)
+{
 
 
+    SZ[u]=1;
+    for(LLI i=0; i<G[u].size(); i++)
+    {
+        LLI v=G[u][i];
+        if(p==v)continue;
+        go(v,u);
+        SZ[u]+=SZ[v];
+    }
+}
+
+LLI big[mx],sum=0,maximum=0;
+map<string,int>cnt[mx];
+void add(LLI v,LLI p,LLI depth,LLI x)
+{
+    cnt[depth][str[v]]+=x;
+    if(cnt[depth][str[v]]==0)
+    {
+        cnt[depth].erase(str[v]);
+    }
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&!big[u])
+            add(u,v,depth+1,x);
+
+    }
+
+}
+LLI ans[mx];
+void outputting(int v)
+{
+    if(v!=2)return;
+    cout<<"FUCKING "<<v<<"\n";
+    for(int i=0; i<=5; i++)
+    {
+        cout<<"FF "<<i<<" : "<<cnt[i].size()<<"\n";
+        map<string,int>:: iterator it;
+        for(it=cnt[i].begin(); it!=cnt[i].end(); it++)
+        {
+
+            cout<<"ss "<<it->first<<" "<<it->second<<"\n";
+        }
+    }
+
+
+}
+vector<pair<int,int> >V[mx];
+void dfs(LLI v,LLI p,int depth,bool keep)
+{
+
+
+
+    LLI maxi=-1,bigchild=-1;
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+        LLI u=G[v][i];
+        if(u!=p&&SZ[u]>maxi)
+            maxi=SZ[u],bigchild=u;
+    }
+
+
+    for(LLI i=0; i<G[v].size(); i++)
+    {
+
+        LLI u=G[v][i];
+        if(u!=p&&u!=bigchild)
+            dfs(u,v,depth+1,0);
+    }
+
+
+    if(bigchild!=-1)
+        dfs(bigchild,v,depth+1,1),big[bigchild]=1;
+
+    add(v,p,depth,1);
+
+    //ans[v]=sum;
+    for(int i=0; i<V[v].size(); i++)
+    {
+
+
+        ans[V[v][i].ff]=cnt[V[v][i].ss+depth].size();
+
+
+    }
+
+    //outputting(v);
+
+
+
+    if(bigchild!=-1)
+        big[bigchild]=0;
+    if(keep==0)
+        add(v,p,depth,-1);
+
+
+}
+map<int,int>M;
+void testing()
+{
+
+    M[1]=2;
+    M[3]=2;
+    M[5]=1;
+    M[6]=0;
+    cout<<M.size()<<"\n";
+    M.erase(6);
+    cout<<M.size()<<"\n";
+}
 int main()
 {
-    //READ("input.txt");
+//    READ("input.txt");
     //WRITE("output.txt");
+
+
+    // testing();
+    input();
+    int query,v,k;
+    cin>>query;
+    for(int i=0; i<query; i++)
+    {
+        cin>>v>>k;
+        V[v].PB(MP(i,k));
+
+    }
+    for(int i=0; i<root.size(); i++)
+    {
+
+        go(root[i],-1);
+        dfs(root[i],-1,0,0);
+
+    }
+for(int i=0;i<query;i++){
+
+cout<<ans[i]<<"\n";
+}
+puts("");
     return 0;
 }
 
